@@ -1,3 +1,0 @@
-@echo off
-echo Starting Soil Crop Recommendation Server...
-python app.py
