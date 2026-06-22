@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ta"> <!-- Set language to Tamil -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>உழவன் தோழன் - மண் படத்தை பதிவேற்றவும்</title> <!-- Upload Page Title -->
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+
+    <!-- Google Fonts (including Tamil support) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;700&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Custom Styles -->
+    <style>
+        body {
+            font-family: 'Noto Sans Tamil', 'Poppins', sans-serif;
+            background-color: #f0f4f0; /* Light green-grey background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .upload-container {
+            max-width: 650px; /* Slightly wider */
+            width: 100%;
+            padding: 35px 40px; /* More padding */
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            border-top: 5px solid #28a745; /* Green accent top border */
+        }
+        .upload-container h2 {
+             color: #2c5e2e; /* Darker green heading */
+             font-weight: 700;
+        }
+        .form-label {
+            font-weight: 700;
+            color: #495057;
+        }
+         .form-control-lg {
+             padding: 0.8rem 1.2rem; /* Adjust padding */
+         }
+        .btn-analyze {
+            font-weight: 600;
+            padding: 0.75rem 1.5rem; /* Adjust button padding */
+            font-size: 1.1rem;
+        }
+        .preview-area {
+            margin-top: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            min-height: 200px; /* Ensure space even without image */
+            border: 2px dashed #ced4da; /* Dashed border */
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        .preview-area img {
+            max-width: 100%;
+            max-height: 200px; /* Maintain max height */
+            display: none; /* Hide initially */
+            border-radius: 4px;
+        }
+        .preview-area span { /* Placeholder text */
+            color: #6c757d;
+            font-style: italic;
+        }
+        .alert-flash { /* Style for flashed messages */
+             margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="upload-container">
+            <h2 class="text-center mb-3">மண் படத்தை பதிவேற்றவும்</h2>
+            <p class="text-center text-muted mb-4">உங்கள் மண் வகையை அறிய, தெளிவான மண் மாதிரியின் படத்தை தேர்ந்தெடுக்கவும்.</p>
+
+            <!-- Flash Messages Area -->
+            <!-- This block will display messages if redirected with flash() in Flask -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category if category else 'info' }} alert-dismissible fade show alert-flash" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            <!-- End Flash Messages Area -->
+
+            <!-- ***** CORRECTED FORM ***** -->
+            <!-- Action points to the 'predict_soil' endpoint defined in Flask -->
+            <!-- method="post" is required -->
+            <!-- enctype="multipart/form-data" is ESSENTIAL for file uploads -->
+            <form action="{{ url_for('predict_soil') }}" method="post" enctype="multipart/form-data">
+
+                <div class="mb-3">
+                    <label for="soil-image-input" class="form-label">மண் படத்தை தேர்ந்தெடுக்கவும்:</label>
+                    <!-- 'name="file"' is crucial - must match request.files['file'] in Flask -->
+                    <input class="form-control form-control-lg" type="file" id="soil-image-input" name="file" accept="image/*" required onchange="previewImage(event)">
+                    <!-- 'required' attribute ensures browser checks for file selection -->
+                </div>
+
+                <!-- Image Preview Area -->
+                <div class="preview-area" id="preview-container">
+                    <img id="image-preview" src="#" alt="Image Preview"/>
+                    <span id="preview-text">பட முன்னோட்டம் இங்கே தோன்றும்</span> <!-- Placeholder text -->
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <!-- The button inside the form defaults to type="submit" -->
+                    <button type="submit" class="btn btn-success btn-lg btn-analyze">மண்ணை பகுப்பாய்வு செய்</button>
+                </div>
+
+            </form>
+            <!-- ***** END FORM ***** -->
+
+            <div class="text-center mt-3">
+                 <a href="{{ url_for('home') }}" class="btn btn-link btn-sm">முகப்புக்குச் செல்</a> <!-- Link back to Home -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Simple JavaScript for Image Preview -->
+    <script>
+        function previewImage(event) {
+            const reader = new FileReader();
+            const preview = document.getElementById('image-preview');
+            const previewText = document.getElementById('preview-text'); // Get the placeholder text element
+
+            reader.onload = function(){
+                if (preview) {
+                    preview.src = reader.result;
+                    preview.style.display = 'block'; // Show the image element
+                }
+                 if (previewText) {
+                     previewText.style.display = 'none'; // Hide the placeholder text
+                 }
+            }
+
+            if (event.target.files && event.target.files[0]) {
+                reader.readAsDataURL(event.target.files[0]);
+            } else {
+                 // Reset if no file is selected or selection is cancelled
+                if (preview) {
+                    preview.src = '#';
+                    preview.style.display = 'none';
+                }
+                 if (previewText) {
+                     previewText.style.display = 'block'; // Show the placeholder text again
+                 }
+            }
+        }
+    </script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+</body>
+</html>

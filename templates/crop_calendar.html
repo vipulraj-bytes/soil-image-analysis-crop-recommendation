@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>உழவன் தோழன் - விவசாய காலண்டர்</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;700&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans Tamil', 'Poppins', sans-serif;
+            background-color: #f8f9fa; /* Light background */
+            padding-bottom: 40px;
+        }
+        .calendar-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px 35px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-top: 5px solid #198754; /* Green accent */
+        }
+        .calendar-container h2 {
+            color: #146c43; /* Darker Green */
+            font-weight: 700;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .activity-list {
+            list-style: none; /* Remove default bullets */
+            padding-left: 0;
+        }
+        .activity-list li {
+            background-color: #eef7f1; /* Very light green */
+            border-left: 4px solid #20c997; /* Teal border */
+            padding: 12px 18px;
+            margin-bottom: 12px;
+            border-radius: 5px;
+            font-size: 1.05rem;
+            color: #333;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .activity-list li:hover {
+            background-color: #d1f0e0; /* Slightly darker green on hover */
+        }
+        .no-activities {
+            font-style: italic;
+            color: #6c757d;
+            text-align: center;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+         .nav-links {
+            text-align: center;
+            margin-top: 30px;
+        }
+        .nav-links a {
+            text-decoration: none;
+            color: #0d6efd; /* Bootstrap primary blue */
+            margin: 0 10px;
+        }
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+
+        /* Simple Tamil month name mapping (could be improved with JS/backend logic) */
+        .month-ta-1::before { content: "ஜனவரி"; }
+        .month-ta-2::before { content: "பிப்ரவரி"; }
+        .month-ta-3::before { content: "மார்ச்"; }
+        .month-ta-4::before { content: "ஏப்ரல்"; }
+        .month-ta-5::before { content: "மே"; }
+        .month-ta-6::before { content: "ஜூன்"; }
+        .month-ta-7::before { content: "ஜூலை"; }
+        .month-ta-8::before { content: "ஆகஸ்ட்"; }
+        .month-ta-9::before { content: "செப்டம்பர்"; }
+        .month-ta-10::before { content: "அக்டோபர்"; }
+        .month-ta-11::before { content: "நவம்பர்"; }
+        .month-ta-12::before { content: "டிசம்பர்"; }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="calendar-container">
+            <!-- Display Month Name using CSS pseudo-element based on month number -->
+            <h2>
+                <span class="month-ta-{{ month_num }}"></span> <!-- CSS will add Tamil month name -->
+                 மாதத்திற்கான விவசாய செயல்பாடுகள்
+            </h2>
+
+            {% if activities %}
+                <ul class="activity-list">
+                    {% for activity in activities %}
+                        <li>{{ activity }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                 <!-- This message will likely show if the dictionary is empty or month key missing -->
+                 <p class="no-activities">இந்த மாதத்திற்கான செயல்பாடுகள் எதுவும் பதிவேற்றப்படவில்லை.</p>
+            {% endif %}
+
+             <div class="nav-links">
+                 <a href="{{ url_for('home') }}">முகப்புக்குச் செல்</a>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- No specific JS needed for this basic calendar page yet -->
+</body>
+</html>

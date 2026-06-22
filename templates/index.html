@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ta"> <!-- Set language to Tamil -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>உழவன் தோழன் - விவசாய வழிகாட்டி</title> <!-- Updated Browser Tab Title -->
+
+    <!-- Google Fonts (including Tamil support) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;700&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+
+    <!-- Custom Styles -->
+    <style>
+        body {
+            font-family: 'Noto Sans Tamil', 'Poppins', sans-serif;
+            /* Background Image - *** REPLACE THIS URL *** */
+            background-image:
+                linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)),
+                url('https://images.unsplash.com/photo-1560493676-04071c5f467b?q=80&w=1974&auto=format&fit=crop'); /* Example - Replace! */
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            padding-bottom: 50px;
+            color: #333;
+        }
+
+        .container {
+             background-color: rgba(255, 255, 255, 0.92);
+             border-radius: 10px;
+             padding: 30px;
+             margin-top: 30px;
+             box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .app-header h1 { font-weight: 700; color: #1f6c2b; margin-bottom: 0.5rem; font-size: 2.8rem; }
+        .app-header .lead { color: #4a5568; font-size: 1.1rem; font-family: 'Poppins', sans-serif; }
+
+        .card-header { font-weight: 700; font-size: 1.4rem; border-bottom: none; }
+        .card-header.bg-success, .card-header.bg-primary { color: #fff !important; }
+        .card-header.bg-info { color: #000 !important; }
+        .card { border: none; }
+        .card-body { color: #444; font-size: 1.05rem; }
+
+        #soil-type-output { font-weight: 700; display: block; margin-top: 5px; }
+        #soil-crops-output { font-weight: 700; color: #198754; display: block; margin-top: 5px; }
+        #soil-type-output.uncertain { color: #fd7e14; } /* Style for uncertain output */
+
+
+        #soil-results { margin-top: 1.5rem; padding: 1.25rem; border: 1px solid #c3e6cb; border-radius: 0.375rem; background-color: #f8f9fa; }
+        #soil-results h4 { font-weight: 700; color: #343a40; margin-bottom: 1rem; }
+
+        .btn { font-weight: 600; padding: 0.6rem 1.2rem; font-size: 1.1rem; }
+        .form-label { font-weight: 700; color: #495057; }
+
+        /* Chat styles */
+        #chat-log { height: 300px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; background-color: #fff; }
+        .user-message { text-align: right; margin-bottom: 8px; }
+        .user-message span { background-color: #d1e7dd; padding: 5px 10px; border-radius: 10px; display: inline-block; }
+        .bot-message { text-align: left; margin-bottom: 8px; }
+        .bot-message span { background-color: #f8f9fa; border: 1px solid #eee; padding: 5px 10px; border-radius: 10px; display: inline-block; }
+
+    </style>
+</head>
+<body>
+
+    <div class="container mt-4">
+        <!-- Header -->
+        <header class="text-center mb-5 app-header">
+            <h1>உழவன் தோழன்</h1>
+            <hr style="max-width: 200px; margin: 1rem auto; border-top-width: 2px; color: #1f6c2b;">
+        </header>
+
+        <!-- Module 1: Soil Analysis -->
+        <div class="card shadow-sm mb-4" id="soil-module">
+            <div class="card-header bg-success text-white">1. மண் ஆய்வு & பயிர் பரிந்துரை</div>
+            <div class="card-body">
+                 <p>உங்கள் மண் வகையை அறியவும் பயிர் பரிந்துரைகளைப் பெறவும் மண் மாதிரியின் படத்தை பதிவேற்றவும்.</p>
+
+                 <!-- **** ADDED THIS NOTE **** -->
+                 <p class="text-muted small mb-2"><em>சிறந்த முடிவுகளுக்கு, தெளிவான மண் மாதிரியின் படத்தை பதிவேற்றவும். (For best results, please upload a clear image of a soil sample.)</em></p>
+                 <!-- **** END OF NOTE **** -->
+
+                <div class="mb-3">
+                    <label for="soil-image-input" class="form-label">மண் படத்தை தேர்ந்தெடுக்கவும்:</label>
+                    <input class="form-control form-control-lg" type="file" id="soil-image-input" accept="image/*">
+                </div>
+                <button class="btn btn-success" id="classify-soil-button">மண்ணை பகுப்பாய்வு செய்</button>
+
+                <!-- Feedback Area -->
+                <div class="alert alert-info mt-3 d-flex align-items-center" role="alert" id="loading-indicator" style="display: none;">
+                     <div class="spinner-border spinner-border-sm me-2" role="status"><span class="visually-hidden">Loading...</span></div>
+                     படம் பகுப்பாய்வு செய்யப்படுகிறது... காத்திருக்கவும்.
+                </div>
+                <div class="alert alert-danger mt-3" role="alert" id="error-message" style="display: none;">
+                    <!-- Error text inserted by JS -->
+                </div>
+
+                <!-- Results Area -->
+                <div id="soil-results" style="display: none;">
+                    <h4>பகுப்பாய்வு முடிவுகள்:</h4>
+                    <p><strong>கணிக்கப்பட்ட மண் வகை:</strong> <span id="soil-type-output"></span></p>
+                    <p><strong>பரிந்துரைக்கப்பட்ட பயிர்கள்:</strong> <span id="soil-crops-output"></span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 2: Weather-Based Crop Planning (Placeholder) -->
+        <div class="card shadow-sm mb-4" id="weather-module">
+             <div class="card-header bg-primary text-white">2. வானிலை ఆధారిత பயிர் திட்டமிடல்</div>
+            <div class="card-body">
+                <p>வானிலை முன்னறிவிப்புகளின் அடிப்படையில் பயிர் பரிந்துரைகளைப் பெற உங்கள் நடவு மாதம் மற்றும் இருப்பிடத்தைத் தேர்ந்தெடுக்கவும்.</p>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label for="start-month-input" class="form-label">நடவு மாதம் (தேர்ந்தெடுக்க):</label>
+                        <input type="month" class="form-control" id="start-month-input">
+                    </div>
+                    <div class="col-md-5">
+                        <label for="location-input" class="form-label">இடம் (Location):</label>
+                        <input type="text" class="form-control" id="location-input" placeholder="எ.கா., கோயம்புத்தூர்">
+                    </div>
+                     <div class="col-12">
+                          <button class="btn btn-primary mt-2" id="plan-crops-button">பயிர்களை பரிந்துரை செய்</button>
+                     </div>
+                </div>
+                <div class="alert alert-info mt-3 d-flex align-items-center" role="alert" id="loading-indicator-weather" style="display: none;">
+                    <div class="spinner-border spinner-border-sm me-2" role="status"><span class="visually-hidden">Loading...</span></div>
+                    பரிந்துரைகள் ஏற்றப்படுகின்றன...
+                </div>
+                <div class="alert alert-danger mt-3" role="alert" id="error-message-weather" style="display: none;"></div>
+                <div id="weather-results-area" class="mt-3"></div>
+            </div>
+        </div>
+
+        <!-- Module 3: Farmer Chatbot (Placeholder) -->
+        <div class="card shadow-sm" id="chatbot-module">
+              <div class="card-header bg-info text-dark">3. விவசாய அரட்டை உதவி</div>
+            <div class="card-body">
+                <p>வேளாண்மை நடைமுறைகள், உரங்கள், பூச்சிகள் மற்றும் பலவற்றைப் பற்றி கேள்விகளைக் கேளுங்கள்.</p>
+                <div id="chat-log" class="mb-3">
+                    <div class="bot-message"><span>வணக்கம்! விவசாயம் பற்றி என்னிடம் கேளுங்கள்.</span></div>
+                </div>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="chat-input" placeholder="உங்கள் கேள்வியை இங்கே தட்டச்சு செய்யவும்...">
+                    <button class="btn btn-info" id="chat-send-btn">அனுப்பு</button>
+                </div>
+                <div class="alert alert-info mt-3 d-flex align-items-center" role="alert" id="loading-indicator-chat" style="display: none;">
+                     <div class="spinner-border spinner-border-sm me-2" role="status"><span class="visually-hidden">Loading...</span></div>
+                     பதிலுக்காக காத்திருக்கிறது...
+                </div>
+                 <div class="alert alert-danger mt-3" role="alert" id="error-message-chat" style="display: none;"></div>
+            </div>
+        </div>
+
+    </div> <!-- End Container -->
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <!-- Your Custom JS -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

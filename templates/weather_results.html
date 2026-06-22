@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>உழவன் தோழன் - வானிலை பயிர் முடிவுகள்</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;700&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Optional: Add Bootstrap Icons CSS if you want to use icons -->
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"> -->
+    <style>
+        body { font-family: 'Noto Sans Tamil', 'Poppins', sans-serif; background-color: #eef2f7; padding-bottom: 40px; } /* Added padding */
+        .results-container { max-width: 950px; margin: 40px auto; padding: 30px 35px; background-color: #fff; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+        .results-container h2 { color: #0a58ca; font-weight: 700; }
+        .criteria { background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #dee2e6;}
+        .criteria p { margin-bottom: 0.5rem; font-size: 1.1rem;}
+        .crop-list-item {
+            list-style: none;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            border: 1px solid #ced4da; /* Neutral border */
+            border-left-width: 5px; /* Keep thicker left border */
+            border-radius: 8px;
+            background-color: #ffffff;
+            transition: box-shadow 0.2s ease-in-out;
+        }
+         .crop-list-item:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        /* Default border color */
+        .crop-list-item { border-left-color: #6c757d; } /* Grey default */
+        /* Green border if both temp and rain OK */
+        .crop-list-item.climate-ok { border-left-color: #198754; background-color: #f4fcf7; }
+        /* Orange border if climate check has issues (fail or missing data) */
+        .crop-list-item.climate-warning { border-left-color: #fd7e14; background-color: #fff8f0; }
+        /* Light blue for alternatives */
+        .crop-list-item.alternative { border-left-color: #0dcaf0; background-color: #f0f9ff; }
+
+        .crop-list-item strong { color: #212529; font-size: 1.2rem; display: block; margin-bottom: 8px; }
+        .crop-list-item .details { color: #495057; display: block; font-size: 0.9rem; margin-top: 10px; line-height: 1.6; }
+        .crop-list-item .details code { font-size: 0.85rem; color: #005cbf; background-color: #e7f3ff; padding: 2px 5px; border-radius: 3px;}
+        .crop-list-item .details .text-success { font-weight: 600; }
+        .crop-list-item .details .text-danger { font-weight: 600; }
+        .no-results-msg { font-style: italic; color: #6c757d; }
+        .alt-suggestion-header { font-weight: 700; color: #343a40; font-size: 1.2rem; border-bottom: 2px solid #0d6efd; padding-bottom: 5px;} /* Blue underline */
+        .alt-month-block { margin-bottom: 1.5rem; padding-left: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="results-container">
+            <h2 class="text-center mb-4">வானிலை அடிப்படையாகக் கொண்ட பயிர் பரிந்துரைகள்</h2>
+
+            <!-- Display Criteria Used -->
+            <div class="criteria">
+                <h5>தேர்ந்தெடுக்கப்பட்ட அளவுகோல்:</h5>
+                <p><strong>மண் வகை:</strong> {{ soil_type | capitalize }}</p>
+                <p><strong>மாவட்டம்:</strong> {{ district }}</p>
+                <p><strong>தேர்ந்தெடுக்கப்பட்ட நடவு மாதம்:</strong> {{ start_month_display }}</p>
+            </div>
+            <hr>
+
+            <!-- Display Recommended Crops for SELECTED Month -->
+            <h4 class="mb-3">தேர்ந்தெடுக்கப்பட்ட மாதத்திற்கான பரிந்துரைகள்:</h4>
+            {# Check if recommended_crops list exists and is not empty #}
+            {# Note: app.py now passes None if empty, so check if list is truthy #}
+            {% if recommended_crops %}
+                <ul class="list-unstyled">
+                    {% for crop in recommended_crops %}
+                        {# --- Determine CSS class based on climate match --- #}
+                        {# In this version, recommended_crops only contains climate-passing crops #}
+                        {% set climate_class = 'climate-ok' %}
+
+                        <li class="crop-list-item {{ climate_class }}">
+                            <strong>{{ crop.name }}</strong>
+                            <span class="reason-text">{{ crop.reason }}</span>
+                            <div class="details">
+                                <span> சராசரி வெப்பநிலை: <code>{{ crop.avg_temp }}°C</code> (தேவை: {{ crop.temp_needed }}) - {% if crop.temp_ok %} <span class="text-success">சரி</span> {% else %} <span class="text-danger">பொருந்தமற்றது</span> {% endif %} </span> <br>
+                                <span> மொத்த சராசரி மழை: <code>{{ crop.total_rain }}mm</code> (தேவை: {{ crop.rain_needed }}) - {% if crop.rain_ok %} <span class="text-success">சரி</span> {% else %} <span class="text-danger">பொருந்தமற்றது</span> {% endif %} </span>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {# --- This block handles the case where NO crops passed the climate check for the SELECTED month --- #}
+            {% else %}
+                 <div class="alert alert-warning no-results-msg" role="alert">
+                     நீங்கள் தேர்ந்தெடுத்த மாதத்திற்கு ({{ start_month_display }}) இந்த அளவுகோல்களுடன் ({ soil_type }}, {{ district }}) காலநிலை சோதனையில் தேர்ச்சி பெற்ற பயிர்கள் எதுவும் கிடைக்கவில்லை.
+                 </div>
+
+                 {# **** Display Alternative Suggestions if they exist **** #}
+                 {% if alternative_suggestions %}
+                     <h4 class="mt-5 mb-3">மாற்று நடவு மாதங்களுக்கான பரிந்துரைகள்:</h4>
+                     {# Loop through the dictionary of alternatives: {MonthName: [List of crop dicts]} #}
+                     {% for month_name, crops_in_month in alternative_suggestions.items() %}
+                         <div class="mb-4 alt-month-block">
+                             <h5 class="alt-suggestion-header">{{ month_name }} மாதத்தில் நடவு செய்யக்கூடியவை:</h5>
+                             <ul class="list-unstyled mt-3">
+                                 {% for crop in crops_in_month %}
+                                     {# --- Determine CSS class for alternatives based on climate match --- #}
+                                     {% set alt_climate_class = 'climate-warning' %} {# Default alternative style #}
+                                     {% if crop.temp_ok and crop.rain_ok %}
+                                         {% set alt_climate_class = 'climate-ok' %} {# If alt climate is good, mark green #}
+                                     {% endif %}
+
+                                     <li class="crop-list-item alternative {{ alt_climate_class }}"> {# Added climate class here too #}
+                                         <strong>{{ crop.name }}</strong>
+                                         <span class="reason-text">{{ crop.reason }}</span>
+                                         {# Display climate details for alternatives as well #}
+                                         <div class="details">
+                                             <span> சராசரி வெப்பநிலை: <code>{{ crop.avg_temp }}°C</code> (தேவை: {{ crop.temp_needed }}) - {% if crop.temp_ok %} <span class="text-success">சரி</span> {% else %} <span class="text-danger">பொருந்தமற்றது</span> {% endif %} </span> <br>
+                                             <span> மொத்த சராசரி மழை: <code>{{ crop.total_rain }}mm</code> (தேவை: {{ crop.rain_needed }}) - {% if crop.rain_ok %} <span class="text-success">சரி</span> {% else %} <span class="text-danger">பொருந்தமற்றது</span> {% endif %} </span>
+                                         </div>
+                                     </li>
+                                 {% endfor %}
+                             </ul>
+                         </div>
+                     {% endfor %} {# End loop through alternative months #}
+                 {# Optional: Message if no alternatives found for *any* month #}
+                 {% elif not recommended_crops %} {# Only show this if initial check also failed #}
+                    <p class="text-muted mt-3">மேலும், இந்த மண் வகை மற்றும் மாவட்டத்திற்கு வேறு எந்த மாதத்திலும் பொருத்தமான மாற்றுப் பயிர்கள் பரிந்துரைக்கப்படவில்லை.</p>
+                 {% endif %}
+                 {# **** END: Alternative Suggestions **** #}
+
+            {% endif %}
+            {# --- End Conditional Display --- #}
+
+
+            <div class="text-center mt-4">
+                <a href="{{ url_for('weather_input_page') }}" class="btn btn-secondary">வேறு உள்ளீடுகளை முயற்சிக்கவும்</a>
+                <a href="{{ url_for('home') }}" class="btn btn-link">முகப்புக்குச் செல்</a>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

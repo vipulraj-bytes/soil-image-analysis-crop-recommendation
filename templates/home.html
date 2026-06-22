@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>உழவன் தோழன் - முகப்பு</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;700&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans Tamil', 'Poppins', sans-serif; background-color: #eef2f7; padding-bottom: 40px; }
+        .hero-section { background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1560493676-04071c5f467b?q=80&w=1974&auto=format&fit=crop') center/cover no-repeat fixed; color: white; padding: 60px 20px; text-align: center; margin-bottom: 0px; }
+        .hero-section h1 { font-weight: 700; font-size: 3rem; }
+        /* --- Marquee / Ticker Styles --- */
+        .market-ticker { background-color: #212529; color: #f8f9fa; padding: 10px 0; overflow: hidden; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.2); margin-bottom: 30px; }
+        .market-ticker-content { display: inline-block; padding-left: 100%; animation: marquee 60s linear infinite; font-size: 1rem; font-weight: 500;} /* Adjust animation duration if needed */
+        .market-ticker-content span { margin: 0 2rem; display: inline-block; }
+        .market-ticker-content strong { color: #ffc107; padding-right: 5px;}
+        .market-ticker-content .price-na { color: #adb5bd; }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+        /* --- End Marquee Styles --- */
+        .widget-card { background-color: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 3px 10px rgba(0,0,0,0.08); margin-bottom: 25px; height: 100%; }
+        .widget-card h4 { color: #0d6efd; font-weight: 600; margin-bottom: 15px; border-bottom: 2px solid #eee; padding-bottom: 10px;}
+        .action-section { text-align: center; background-color: #f8f9fa; padding: 40px 20px; border-radius: 8px; margin-top: 20px;}
+        .action-section h3 { margin-bottom: 25px; font-weight: 600; color: #343a40; }
+        .btn-action { font-size: 1.1rem; padding: 10px 20px; font-weight: 600; margin: 8px; min-width: 280px; border-radius: 50px; transition: all 0.3s ease; border: none; display: block; margin-left: auto; margin-right: auto;}
+        .btn-success:hover, .btn-primary:hover, .btn-info:hover, .btn-secondary:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+
+        /* --- Calendar Widget Styles (Copied from crop_calendar.html) --- */
+        .calendar-widget h4 { /* Changed from h2 for hierarchy */
+            color: #146c43; /* Darker Green */
+            font-weight: 700;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px; /* Reduced padding */
+            margin-bottom: 20px; /* Reduced margin */
+        }
+        .activity-list { list-style: none; padding-left: 0; }
+        .activity-list li { background-color: #eef7f1; border-left: 4px solid #20c997; padding: 10px 15px; margin-bottom: 10px; border-radius: 5px; font-size: 1rem; color: #333; transition: background-color 0.2s ease-in-out; }
+        .activity-list li:hover { background-color: #d1f0e0; }
+        .no-activities { font-style: italic; color: #6c757d; padding: 15px; background-color: #f8f9fa; border-radius: 5px; font-size: 0.95rem; }
+
+        /* Tamil month name mapping */
+        .month-ta-1::before { content: "ஜனவரி"; }
+        .month-ta-2::before { content: "பிப்ரவரி"; }
+        .month-ta-3::before { content: "மார்ச்"; }
+        .month-ta-4::before { content: "ஏப்ரல்"; }
+        .month-ta-5::before { content: "மே"; }
+        .month-ta-6::before { content: "ஜூன்"; }
+        .month-ta-7::before { content: "ஜூலை"; }
+        .month-ta-8::before { content: "ஆகஸ்ட்"; }
+        .month-ta-9::before { content: "செப்டம்பர்"; }
+        .month-ta-10::before { content: "அக்டோபர்"; }
+        .month-ta-11::before { content: "நவம்பர்"; }
+        .month-ta-12::before { content: "டிசம்பர்"; }
+        /* --- End Calendar Widget Styles --- */
+
+    </style>
+</head>
+<body>
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="container">
+            <h1>உழவன் தோழன்</h1>
+            <p class="lead">உங்கள் பண்ணையின் மண் வளம் மற்றும் தற்போதைய பருவநிலைக்கு ஏற்ற சிறந்த பயிர்களை எளிதாகக் கண்டறியுங்கள்.</p>
+        </div>
+    </div>
+
+    <!-- Market Price Ticker -->
+    <div class="market-ticker">
+        <div class="market-ticker-content" id="market-ticker-data">
+            <span>சந்தை விலைகள் ஏற்றப்படுகின்றன...</span> <!-- Loading message -->
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="container">
+
+        <!-- Row for Widgets -->
+        <div class="row justify-content-center"> <!-- Center the widgets -->
+             <!-- Calendar Widget Column -->
+            <div class="col-lg-6 col-md-8 mb-4"> <!-- Adjust column width as needed -->
+                <div class="widget-card calendar-widget">
+                    {% if current_month_num %}
+                        <h4><span class="month-ta-{{ current_month_num }}"></span> மாத விவசாய காலண்டர்</h4>
+                    {% else %}
+                         <h4>விவசாய காலண்டர்</h4> <!-- Fallback Title -->
+                    {% endif %}
+
+                    {% if calendar_activities %}
+                        <ul class="activity-list">
+                            {% for activity in calendar_activities %}
+                                <li>{{ activity }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <!-- This message might show if backend had error or no data -->
+                        <p class="no-activities">இந்த மாதத்திற்கான செயல்பாடுகள் எதுவும் தற்போது கிடைக்கவில்லை.</p>
+                    {% endif %}
+                </div>
+            </div>
+             <!-- Add other widgets here in separate cols if needed -->
+             <!-- e.g., Tip of the day widget -->
+             <!-- <div class="col-lg-6 col-md-8 mb-4"> ... </div> -->
+        </div><!-- End Widgets Row -->
+
+
+        <!-- Action Buttons Section -->
+        <div class="action-section widget-card mt-4">
+            <h3>முக்கிய கருவிகள்</h3>
+            <!-- Module 1 Button -->
+            <a href="{{ url_for('upload_page') }}" class="btn btn-success btn-action">மண் ஆய்வு & பயிர் பரிந்துரை</a>
+             <!-- Module 2 (Weather/Climate Planning) Button -->
+            <a href="{{ url_for('weather_input_page') }}" class="btn btn-primary btn-action">வானிலை பயிர் திட்டமிடல்</a>
+            <!-- Crop Calendar Button is REMOVED -->
+             <!-- Module 4 (Chatbot) Button -->
+            <a href="{{ url_for('chatbot_page') }}" class="btn btn-info btn-action text-white">விவசாய அரட்டை உதவி</a>
+        </div>
+
+    </div> <!-- End Container -->
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Your Custom JS -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
