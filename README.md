@@ -121,8 +121,8 @@ For model files or questions, please open an issue on GitHub.
 
 ## Acknowledgments
 
-- Dataset sources: [Add your dataset sources]
-- Weather API: [Add API details]
+- Dataset sources: [               ]
+- Weather API: [             ]
 
 ---
 
